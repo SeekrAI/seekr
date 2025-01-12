@@ -2,13 +2,17 @@
 
 <p align="center">
 CA: Coming soon.
-
+</p>
+<p align="center">
 Twitter: https://x.com/SeekrAI_
-
+    </p>
+<p align="center">
 Website: https://seekerai.net
-
+    </p>
+<p align="center">
 Telegram: https://t.me/seekrAIsol
 </p>
+
 
 <p align="center">
     <b>The future ready AI data platform to power the next generation search pipelines.</b>    
