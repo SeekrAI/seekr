@@ -1,0 +1,473 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2024-07-31 Wed 11:29 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>&lrm;</title>
+<meta name="author" content="Nithin" />
+<meta name="generator" content="Org Mode" />
+<style type="text/css">
+<!--/*--><![CDATA[/*><!--*/
+/* Set the colors in <pre> blocks from the Leuven theme */
+pre                                      {background-color:#FFFFFF;}
+pre span.org-builtin                     {color:#006FE0;font-weight:bold;}
+pre span.org-string                      {color:#008000;}
+pre span.org-keyword                     {color:#0000FF;}
+pre span.org-variable-name               {color:#BA36A5;}
+pre span.org-function-name               {color:#006699;}
+pre span.org-type                        {color:#6434A3;}
+pre span.org-preprocessor                {color:#808080;font-weight:bold;}
+pre span.org-constant                    {color:#D0372D;}
+pre span.org-comment-delimiter           {color:#8D8D84;}
+pre span.org-comment                     {color:#8D8D84;font-style:italic}
+pre span.org-outshine-level-1            {color:#8D8D84;font-style:italic}
+pre span.org-outshine-level-2            {color:#8D8D84;font-style:italic}
+pre span.org-outshine-level-3            {color:#8D8D84;font-style:italic}
+pre span.org-outshine-level-4            {color:#8D8D84;font-style:italic}
+pre span.org-outshine-level-5            {color:#8D8D84;font-style:italic}
+pre span.org-outshine-level-6            {color:#8D8D84;font-style:italic}
+pre span.org-outshine-level-7            {color:#8D8D84;font-style:italic}
+pre span.org-outshine-level-8            {color:#8D8D84;font-style:italic}
+pre span.org-outshine-level-9            {color:#8D8D84;font-style:italic}
+pre span.org-rainbow-delimiters-depth-1  {color:#707183;}
+pre span.org-rainbow-delimiters-depth-2  {color:#7388d6;}
+pre span.org-rainbow-delimiters-depth-3  {color:#909183;}
+pre span.org-rainbow-delimiters-depth-4  {color:#709870;}
+pre span.org-rainbow-delimiters-depth-5  {color:#907373;}
+pre span.org-rainbow-delimiters-depth-6  {color:#6276ba;}
+pre span.org-rainbow-delimiters-depth-7  {color:#858580;}
+pre span.org-rainbow-delimiters-depth-8  {color:#80a880;}
+pre span.org-rainbow-delimiters-depth-9  {color:#887070;}
+pre span.org-sh-quoted-exec              {color:#FF1493;}
+
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+
+/*]]>*/-->
+</style>
+</head>
+<body>
+<div id="content" class="content">
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org95e4efc">1. Quaternary Multiplication Using Bitwise Operations</a>
+<ul>
+<li><a href="#orgfff7eb6">1.1. Objective:</a></li>
+<li><a href="#org874a97a">1.2. Partial products table (actual or notional)</a>
+<ul>
+<li><a href="#orgf24e7d8">1.2.1. Problem Statement</a></li>
+<li><a href="#orgf6c47b5">1.2.2. Representation</a></li>
+<li><a href="#org78c4c25">1.2.3. Steps for Multiplication</a></li>
+<li><a href="#org0ab2ce9">1.2.4. Detailed Steps</a></li>
+<li><a href="#orgd101873">1.2.5. Result</a></li>
+<li><a href="#orge5add8e">1.2.6. Partial products (actual or notional)</a></li>
+<li><a href="#orgcee3b74">1.2.7. Look up table for weights</a></li>
+</ul>
+</li>
+<li><a href="#orgcec5327">1.3. Lookup Tables:</a></li>
+<li><a href="#orgdcfab48">1.4. Methods:</a>
+<ul>
+<li><a href="#org16c4e43">1.4.1. SIMD Lookup Approach:</a></li>
+<li><a href="#org04ba6d2">1.4.2. Accumulation Approach:</a></li>
+</ul>
+</li>
+<li><a href="#org2d3043b">1.5. Optimization Techniques:</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org95e4efc" class="outline-2">
+<h2 id="org95e4efc"><span class="section-number-2">1.</span> Quaternary Multiplication Using Bitwise Operations</h2>
+<div class="outline-text-2" id="text-1">
+</div>
+<div id="outline-container-orgfff7eb6" class="outline-3">
+<h3 id="orgfff7eb6"><span class="section-number-3">1.1.</span> Objective:</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+Compute weighted products efficiently using lookup tables and bitwise operations.
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org874a97a" class="outline-3">
+<h3 id="org874a97a"><span class="section-number-3">1.2.</span> Partial products table (actual or notional)</h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+This document describes the process of performing binary multiplication of two 2-bit numbers. It highlights the steps involved, including calculating partial products and summing them, taking into account the necessary bit positions and carries.
+</p>
+</div>
+
+<div id="outline-container-orgf24e7d8" class="outline-4">
+<h4 id="orgf24e7d8"><span class="section-number-4">1.2.1.</span> Problem Statement</h4>
+<div class="outline-text-4" id="text-1-2-1">
+<p>
+Given two 2-bit binary numbers, we need to multiply them using bitwise operations and properly align and sum the partial products.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgf6c47b5" class="outline-4">
+<h4 id="orgf6c47b5"><span class="section-number-4">1.2.2.</span> Representation</h4>
+<div class="outline-text-4" id="text-1-2-2">
+<p>
+Let’s denote the two 2-bit numbers as <code>a</code> and <code>b</code>, where:
+</p>
+<ul class="org-ul">
+<li><code>a = a_1a_0</code> (with <code>a1</code> and <code>a0</code> being the MSB and LSB of <code>a</code>, respectively)</li>
+<li><code>b = b_1b_0</code> (with <code>b1</code> and <code>b0</code> being the MSB and LSB of <code>b</code>, respectively)</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org78c4c25" class="outline-4">
+<h4 id="org78c4c25"><span class="section-number-4">1.2.3.</span> Steps for Multiplication</h4>
+<div class="outline-text-4" id="text-1-2-3">
+<ol class="org-ol">
+<li>Extract the bits from each 2-bit number.</li>
+<li>Compute the partial products using bitwise AND operations.</li>
+<li>Align the partial products according to their bit positions.</li>
+<li>Sum the aligned partial products to produce the final result.</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org0ab2ce9" class="outline-4">
+<h4 id="org0ab2ce9"><span class="section-number-4">1.2.4.</span> Detailed Steps</h4>
+<div class="outline-text-4" id="text-1-2-4">
+<ol class="org-ol">
+<li>Extract the Bits:
+<ul class="org-ul">
+<li><code>a0 = a &amp; 0b01</code></li>
+<li><code>a1 = (a &gt;&gt; 1) &amp; 0b01</code></li>
+<li><code>b0 = b &amp; 0b01</code></li>
+<li><code>b1 = (b &gt;&gt; 1) &amp; 0b01</code></li>
+</ul></li>
+
+<li><p>
+Calculate Partial Products:
+</p>
+
+<table id="org9a8502e" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">&#xa0;</th>
+<th scope="col" class="org-left">b<sub>1</sub></th>
+<th scope="col" class="org-left">b<sub>0</sub></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">a<sub>1</sub></td>
+<td class="org-left">a<sub>1</sub> b<sub>1</sub></td>
+<td class="org-left">a<sub>1</sub> b<sub>0</sub></td>
+</tr>
+
+<tr>
+<td class="org-left">a<sub>0</sub></td>
+<td class="org-left">a<sub>0</sub> b<sub>1</sub></td>
+<td class="org-left">a<sub>0</sub> b<sub>0</sub></td>
+</tr>
+</tbody>
+</table></li>
+
+<li><p>
+Align Partial Products:
+</p>
+
+<table id="orgce8c479" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">a<sub>1</sub> b<sub>1</sub></td>
+<td class="org-left">a<sub>1</sub> b<sub>0</sub></td>
+</tr>
+
+<tr>
+<td class="org-left">a<sub>0</sub> b<sub>1</sub></td>
+<td class="org-left">a<sub>0</sub> b<sub>0</sub></td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+</table></li>
+
+<li><p>
+Sum Partial Products:
+</p>
+
+<p>
+a<sub>1</sub> b<sub>1</sub> &sdot; 2<sup>2</sup> + (a<sub>1</sub> b<sub>0</sub> + a<sub>0</sub> b<sub>1</sub>) &sdot; 2<sup>1</sup> + a<sub>0</sub> b<sub>0</sub> &sdot; 2<sup>0</sup>
+</p></li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-orgd101873" class="outline-4">
+<h4 id="orgd101873"><span class="section-number-4">1.2.5.</span> Result</h4>
+<div class="outline-text-4" id="text-1-2-5">
+<p>
+By summing the aligned partial products, the final result of the binary multiplication is obtained. This process involves careful alignment and addition to ensure that all carries are appropriately handled.
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-orge5add8e" class="outline-4">
+<h4 id="orge5add8e"><span class="section-number-4">1.2.6.</span> Partial products (actual or notional)</h4>
+<div class="outline-text-4" id="text-1-2-6">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">K</th>
+<th scope="col" class="org-left">b<sub>0</sub> b<sub>0</sub></th>
+<th scope="col" class="org-left">b<sub>0</sub> b<sub>1</sub></th>
+<th scope="col" class="org-left">b<sub>1</sub> b<sub>0</sub></th>
+<th scope="col" class="org-left">b<sub>1</sub> b<sub>1</sub></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">a<sub>0</sub> a<sub>0</sub></td>
+<td class="org-left">_00 _00</td>
+<td class="org-left">_00 _01</td>
+<td class="org-left">_00 _10</td>
+<td class="org-left">_00 _11</td>
+</tr>
+
+<tr>
+<td class="org-left">a<sub>0</sub> a<sub>1</sub></td>
+<td class="org-left">_01 _00</td>
+<td class="org-left">_01 _01</td>
+<td class="org-left">_01 _10</td>
+<td class="org-left">_01 _11</td>
+</tr>
+
+<tr>
+<td class="org-left">a<sub>1</sub> a<sub>0</sub></td>
+<td class="org-left">_10 _00</td>
+<td class="org-left">_10 _01</td>
+<td class="org-left">_10 _10</td>
+<td class="org-left">_10 _11</td>
+</tr>
+
+<tr>
+<td class="org-left">a<sub>1</sub> a<sub>1</sub></td>
+<td class="org-left">_11 _00</td>
+<td class="org-left">_11 _01</td>
+<td class="org-left">_11 _10</td>
+<td class="org-left">_11 _11</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+<div id="outline-container-orgcee3b74" class="outline-4">
+<h4 id="orgcee3b74"><span class="section-number-4">1.2.7.</span> Look up table for weights</h4>
+<div class="outline-text-4" id="text-1-2-7">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-right">K</th>
+<th scope="col" class="org-left">0</th>
+<th scope="col" class="org-left">1</th>
+<th scope="col" class="org-left">2</th>
+<th scope="col" class="org-left">3</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-right">0</td>
+<td class="org-left">w<sub>00</sub></td>
+<td class="org-left">w<sub>01</sub></td>
+<td class="org-left">w<sub>02</sub></td>
+<td class="org-left">w<sub>03</sub></td>
+</tr>
+
+<tr>
+<td class="org-right">1</td>
+<td class="org-left">w<sub>10</sub></td>
+<td class="org-left">w<sub>11</sub></td>
+<td class="org-left">w<sub>12</sub></td>
+<td class="org-left">w<sub>13</sub></td>
+</tr>
+
+<tr>
+<td class="org-right">2</td>
+<td class="org-left">w<sub>20</sub></td>
+<td class="org-left">w<sub>21</sub></td>
+<td class="org-left">w<sub>22</sub></td>
+<td class="org-left">w<sub>23</sub></td>
+</tr>
+
+<tr>
+<td class="org-right">3</td>
+<td class="org-left">w<sub>30</sub></td>
+<td class="org-left">w<sub>31</sub></td>
+<td class="org-left">w<sub>32</sub></td>
+<td class="org-left">w<sub>33</sub></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgcec5327" class="outline-3">
+<h3 id="orgcec5327"><span class="section-number-3">1.3.</span> Lookup Tables:</h3>
+<div class="outline-text-3" id="text-1-3">
+<ul class="org-ul">
+<li></li>
+
+<li>Weights lookup table</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgdcfab48" class="outline-3">
+<h3 id="orgdcfab48"><span class="section-number-3">1.4.</span> Methods:</h3>
+<div class="outline-text-3" id="text-1-4">
+</div>
+<div id="outline-container-org16c4e43" class="outline-4">
+<h4 id="org16c4e43"><span class="section-number-4">1.4.1.</span> SIMD Lookup Approach:</h4>
+<div class="outline-text-4" id="text-1-4-1">
+<ul class="org-ul">
+<li>Use SIMD instructions for parallel lookups in the tables.</li>
+<li>Refer to the AVX2 vectorized 256-bit lookup table method for 32 unsigned chars 
+(Stack Overflow question 43791161).</li>
+<li>Note: This method is limited to byte-sized or larger elements.</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org04ba6d2" class="outline-4">
+<h4 id="org04ba6d2"><span class="section-number-4">1.4.2.</span> Accumulation Approach:</h4>
+<div class="outline-text-4" id="text-1-4-2">
+<p>
+a. Process the entire vector embedding:
+</p>
+<ul class="org-ul">
+<li>Use bitwise operations to generate unique indexes for each partial product.</li>
+<li>Accumulate counts of these indexes instead of computing actual products.</li>
+</ul>
+<p>
+b. After processing the full embedding:
+</p>
+<ul class="org-ul">
+<li>Perform scalar multiplication with weights from the lookup table.</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org2d3043b" class="outline-3">
+<h3 id="org2d3043b"><span class="section-number-3">1.5.</span> Optimization Techniques:</h3>
+<div class="outline-text-3" id="text-1-5">
+<ul class="org-ul">
+<li>Avoid actual multiplication operations where possible.</li>
+<li>Use bitwise operations to ensure unique indexes for lookup.</li>
+<li>For sub-byte sizes, prefer the accumulation approach as SIMD is not applicable.</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Nithin</p>
+<p class="date">Created: 2024-07-31 Wed 11:29</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

@@ -1,0 +1,302 @@
+#+TITLE: Hierarchical Version Control System Design
+#+AUTHOR: Nithin Mani 
+#+DATE: [2024-08-19 Mon]
+
+* Overview
+
+This system implements a hierarchical version control mechanism, generating unique, deterministic hashes for version numbers across different branches. It uses a custom XOR-based hashing algorithm and maintains separate hash maps for versions and branches.
+
+** Versioning and branches illustration
+
+[[file:./branches.png]]
+
+
+** Illustration of Version and Branch Hierarchy 
+
+#+BEGIN_SRC ascii
+jammy (main)
+|
+|-- v1 (hash: Tz7m1cznF9E=)
+|
+|-- v2 (hash: X3kP2qnvGfA=)
+|   |
+|   +-- kinetic
+|   |   |
+|   |   |-- v1 (hash: Y5bQ3rnwHgB=)
+|   |   |
+|   |   |-- v2 (hash: Z7dS4tnxIhC=)
+|   |   |
+|   |   +-- v3 (hash: A9fU5vnzJiD=)
+|   |
+|   +-- lunar
+|       |
+|       +-- v1 (hash: B1hW6xn0KjE=)
+|
+|-- v3 (hash: C3jY7zn1LkF=)
+|
+|-- v4 (hash: D5lA8Bn2MlG=)
+    |
+    +-- mantic
+        |
+        |-- v1 (hash: E7nC9Dn3NmH=)
+        |
+        +-- v2 (hash: F9pE0Fn4OnI=)
+            |
+            +-- noble
+                |
+                +-- v1 (hash: G1rG1Hn5PnJ=)
+#+END_SRC
+
+** Example Branch and Version Details
+
+*** Jammy (Main Branch)
+- v1: ~Tz7m1cznF9E=~
+- v2: ~X3kP2qnvGfA=~
+- v3: ~C3jY7zn1LkF=~
+- v4: ~D5lA8Bn2MlG=~
+
+*** Kinetic
+- Parent: Jammy v2
+- v1: ~Y5bQ3rnwHgB=~
+- v2: ~Z7dS4tnxIhC=~
+- v3: ~A9fU5vnzJiD=~
+
+*** Lunar
+- Parent: Jammy v2
+- v1: ~B1hW6xn0KjE=~
+
+*** Mantic
+- Parent: Jammy v4
+- v1: ~E7nC9Dn3NmH=~
+- v2: ~F9pE0Fn4OnI=~
+
+*** Noble
+- Parent: Mantic v2
+- v1: ~G1rG1Hn5PnJ=~
+
+  
+* Core Components
+
+** Strict Types
+
+#+BEGIN_SRC rust
+use std::collections::HashMap;
+use std::time::{SystemTime, UNIX_EPOCH};
+use siphasher::sip::SipHasher24;
+use std::hash::Hasher;
+
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+struct BranchId(u64);
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+struct Version(u32);
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+struct Timestamp(u32);
+
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+struct Hash(u32);
+
+impl BranchId {
+    fn new(branch_name: &str) -> Self {
+        let mut hasher = SipHasher24::new();
+        hasher.write(branch_name.as_bytes());
+        BranchId(hasher.finish())
+    }
+}
+
+impl Timestamp {
+    fn now() -> Self {
+        Timestamp(SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_secs() as u32)
+    }
+}
+#+END_SRC
+
+** VersionHash
+
+#+BEGIN_SRC rust
+#[derive(Clone, Debug)]
+struct VersionHash {
+    branch: BranchId,
+    version: Version,
+    timestamp: Timestamp,
+}
+
+impl VersionHash {
+    fn new(branch: BranchId, version: Version) -> Self {
+        Self {
+            branch,
+            version,
+            timestamp: Timestamp::now(),
+        }
+    }
+
+    fn calculate_hash(&self) -> Hash {
+        let branch_last_4_bytes = (self.branch.0 & 0xFFFFFFFF) as u32;
+        Hash(branch_last_4_bytes ^ self.version.0 ^ self.timestamp.0)
+    }
+}
+#+END_SRC
+
+** BranchInfo
+
+#+BEGIN_SRC rust
+#[derive(Clone, Debug)]
+struct BranchInfo {
+    branch_name: String,
+    current_version: Version,
+    parent_branch: BranchId,
+    parent_version: Version,
+}
+#+END_SRC
+
+** VersionControl
+
+#+BEGIN_SRC rust
+struct VersionControl {
+    versions: HashMap<Hash, VersionHash>,
+    branches: HashMap<BranchId, BranchInfo>,
+}
+
+impl VersionControl {
+    fn new() -> Self {
+        let mut branches = HashMap::new();
+        let main_branch_id = BranchId::new("main");
+        branches.insert(main_branch_id, BranchInfo {
+            branch_name: "main".to_string(),
+            current_version: Version(0),
+            parent_branch: main_branch_id,
+            parent_version: Version(0),
+        });
+        Self {
+            versions: HashMap::new(),
+            branches,
+        }
+    }
+
+    fn generate_hash(&mut self, branch_name: &str, version: Version) -> Hash {
+        let branch_id = BranchId::new(branch_name);
+        let version_hash = VersionHash::new(branch_id, version);
+        let hash = version_hash.calculate_hash();
+        self.versions.insert(hash, version_hash);
+        hash
+    }
+
+    fn add_next_version(&mut self, branch_name: &str) -> Hash {
+        let branch_id = BranchId::new(branch_name);
+        let branch_info = self.branches.get_mut(&branch_id).unwrap();
+        branch_info.current_version = Version(branch_info.current_version.0 + 1);
+        self.generate_hash(branch_name, branch_info.current_version)
+    }
+
+    fn create_new_branch(&mut self, branch_name: &str, parent_branch_name: &str) -> Result<(), &'static str> {
+        let branch_id = BranchId::new(branch_name);
+        if self.branches.contains_key(&branch_id) {
+            return Err("Branch already exists");
+        }
+
+        let parent_branch_id = BranchId::new(parent_branch_name);
+        let parent_info = self.branches.get(&parent_branch_id)
+            .ok_or("Parent branch does not exist")?;
+
+        let new_branch_info = BranchInfo {
+            branch_name: branch_name.to_string(),
+            current_version: Version(0),
+            parent_branch: parent_branch_id,
+            parent_version: parent_info.current_version,
+        };
+
+        self.branches.insert(branch_id, new_branch_info);
+        Ok(())
+    }
+
+    fn branch_exists(&self, branch_name: &str) -> bool {
+        let branch_id = BranchId::new(branch_name);
+        self.branches.contains_key(&branch_id)
+    }
+
+    fn get_branch_info(&self, branch_name: &str) -> Option<&BranchInfo> {
+        let branch_id = BranchId::new(branch_name);
+        self.branches.get(&branch_id)
+    }
+
+    fn trace_to_main(&self, start_branch: &str) -> Vec<&BranchInfo> {
+        let mut branch_path = Vec::new();
+        let mut current_branch_id = BranchId::new(start_branch);
+        
+        while let Some(info) = self.branches.get(&current_branch_id) {
+            branch_path.push(info);
+            if info.branch_name == "main" {
+                break;
+            }
+            current_branch_id = info.parent_branch;
+        }
+        
+        branch_path.reverse();
+        branch_path
+    }
+}
+#+END_SRC
+
+* Usage Example
+
+#+BEGIN_SRC rust
+fn main() {
+    let mut vc = VersionControl::new();
+
+    // Create branches
+    vc.create_new_branch("feature", "main").unwrap();
+    vc.create_new_branch("bugfix", "feature").unwrap();
+
+    // Generate hashes
+    let main_v1 = vc.add_next_version("main");
+    let main_v2 = vc.add_next_version("main");
+    let feature_v1 = vc.add_next_version("feature");
+    let bugfix_v1 = vc.add_next_version("bugfix");
+
+    println!("Main branch v1 hash: {:?}", main_v1);
+    println!("Main branch v2 hash: {:?}", main_v2);
+    println!("Feature branch v1 hash: {:?}", feature_v1);
+    println!("Bugfix branch v1 hash: {:?}", bugfix_v1);
+
+    // Trace branch hierarchy
+    let branch_path = vc.trace_to_main("bugfix");
+    for info in branch_path {
+        println!("Branch: {}, Current Version: {:?}", info.branch_name, info.current_version);
+    }
+}
+#+END_SRC
+
+* Key Features
+
+1. Strict typing for BranchId, Version, Timestamp, and Hash.
+2. Separate hash maps for versions (Hash -> VersionHash) and branches (BranchId -> BranchInfo).
+3. SipHash-2-4 for generating BranchId from branch names.
+4. Custom XOR-based hash calculation for version hashes.
+5. Automatic version incrementing with `add_next_version()`.
+6. Branch creation with parent branch information.
+7. Branch existence checking and information retrieval.
+8. Branch hierarchy tracing from any branch to the main branch.
+
+* Considerations and Constraints
+
+1. The system uses 32-bit integers for version numbers and timestamps.
+2. Branch identifiers are 64-bit integers derived from branch names.
+3. The system stores parent branch information, allowing for tracking of the branch hierarchy.
+4. Hash generation is deterministic based on branch, version, and timestamp.
+5. When creating a new branch, the parent branch must exist.
+6. The timestamp adds a time-based component to the hash, making it unique even for repeated branch-version combinations.
+
+* Potential Enhancements
+
+1. Implement branch merging logic.
+2. Add support for custom version numbering schemes.
+3. Implement a caching mechanism for frequently accessed hashes.
+4. Add functionality to reconstruct the full branch hierarchy from the stored information.
+5. Implement validation to ensure version continuity within branches.
+6. Consider using a more sophisticated hash function if collision resistance becomes a concern.
+7. Add serialization and deserialization for persistent storage.
+8. Implement concurrent access handling for multi-threaded environments.

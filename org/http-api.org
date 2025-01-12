@@ -1,0 +1,282 @@
+* Vector Database API Design
+
+** Collection Creation
+#+begin_src yaml
+create_collection:
+  name: string
+  description: string (optional)
+  dense_vector:
+    enabled: boolean
+    auto_create_index: boolean
+    dimension: integer
+  sparse_vector:
+    enabled: boolean
+    auto_create_index: boolean
+  metadata_schema: object (optional)
+  config:
+    max_vectors: integer (optional)
+    replication_factor: integer (optional)
+#+end_src
+
+** Index Creation
+#+begin_src yaml
+create_index:
+  collection_name: string
+  name: string
+  dense_index:
+    enabled: boolean
+    type: string  # Currently only "hnsw" is supported
+    quantization:
+      enabled: boolean
+      resolution: integer # Range 1-8
+    params:
+      m: integer (optional)
+      ef_construction: integer (optional)
+      # Other HNSW-specific parameters
+  sparse_index:
+    enabled: boolean
+    type: string  # Currently only "inverted_index" is supported
+    quantization:
+      enabled: boolean
+      resolution: integer # Range 1-8
+    params:
+#+end_src
+
+** Namespace Creation
+#+begin_src yaml
+create_namespace:
+  collection_name: string
+  name: string
+  description: string (optional)
+#+end_src
+
+** Vector Structure
+#+begin_src yaml
+vector:
+  id: string
+  values: array[float] (optional)
+  sparse_values:
+    indices: array[integer]
+    values: array[float]
+  metadata: object (optional)
+  namespace: string (optional)
+#+end_src
+
+** Example Metadata Schema
+#+begin_src yaml
+create_collection:
+  name: "clothing_items"
+  description: "Collection of clothing item vectors and metadata"
+  dense_vector:
+    enabled: true
+    auto_create_index: true
+    dimension: 512
+  sparse_vector:
+    enabled: true
+    auto_create_index: true
+  metadata_schema:
+    product_id:
+      type: "string"
+      index: true
+    category:
+      type: "string"
+      index: true
+    brand:
+      type: "string"
+      index: true
+    price:
+      type: "float"
+      index: false
+    color:
+      type: "string"
+      index: true
+    size:
+      type: "string"
+      index: true
+    date_added:
+      type: "date"
+      index: true
+  config:
+    max_vectors: 1000000
+    replication_factor: 3
+#+end_src
+
+* Vector Insertion API 
+
+** Upsert API URL
+POST /api/v1/collections/{collection_name}/vectors
+
+** Request Body
+#+BEGIN_SRC json
+{
+  "vectors": [
+    {
+      "id": "vec1",
+      "values": [0.1, 0.2, 0.3, ...], // Optional dense vector
+      "sparse_values": { // Optional sparse vector
+        "indices": [0, 5],
+        "values": [0.2849, 0.9092]
+      },
+      "metadata": {
+        "key1": "value1",
+        "key2": "value2"
+      }
+    },
+    // More vectors...
+  ]
+}
+#+END_SRC
+
+** Notes
+- Supports upsert of dense vectors, sparse vectors, or both
+- Common ID field for both dense and sparse representations
+- Can upsert just dense, just sparse, or both in a single request
+
+* Query API
+
+** Query API URL
+POST /api/v1/collections/{collection_name}/query
+
+** Request Body
+#+BEGIN_SRC json
+{
+  "vector": [0.1, 0.2, 0.3, ...], // Optional dense query vector
+  "sparse_vector": { // Optional sparse query vector
+    "indices": [0, 5],
+    "values": [0.2849, 0.9092]
+  },
+  "top_k": 10,
+  "sparse_top_k": 20, // Explicit count for sparse vector ANN
+  "include_metadata": true,
+  "namespace": "default"
+}
+#+END_SRC
+
+** Response Body
+#+BEGIN_SRC json
+{
+  "dense_results": [
+    {
+      "id": "vec1",
+      "score": 0.95,
+      "metadata": {...}
+    },
+    // More dense results...
+  ],
+  "sparse_results": [
+    {
+      "id": "vec2",
+      "score": 0.88,
+      "metadata": {...}
+    },
+    // More sparse results...
+  ]
+}
+#+END_SRC
+
+** Notes
+- Supports querying with dense vectors, sparse vectors, or both
+- Separate top_k parameters for dense and sparse results
+- Returns separate result sets for dense and sparse vector matches
+
+* Vector Insertion Scenarios
+
+** Scenario 1: Index Created Upfront (Implicitly or Explicitly)
+
+*** Insert API URL
+    POST /api/v1/collections/{collection_name}/vectors
+
+*** Request Body
+    #+BEGIN_SRC json
+    {
+      "vectors": [
+        {
+          "id": "vec1",
+          "values": [0.1, 0.2, 0.3, ...],
+          "metadata": {
+            "key1": "value1",
+            "key2": "value2"
+          }
+        },
+        // More vectors...
+      ]
+    }
+    #+END_SRC
+
+*** Notes
+    - Simple insertion process
+    - Vectors are indexed immediately
+    - May be slower for very large batches
+
+** Scenario 2: Index Created After Inserts
+
+*** Insert API URL (Initial)
+    POST /api/v1/collections/{collection_name}/vectors/unindexed
+
+*** Request Body (Initial)
+    #+BEGIN_SRC json
+    {
+      "vectors": [
+        {
+          "id": "vec1",
+          "values": [0.1, 0.2, 0.3, ...],
+          "metadata": {
+            "key1": "value1",
+            "key2": "value2"
+          }
+        },
+        // More vectors...
+      ]
+    }
+    #+END_SRC
+
+*** Index Creation API URL
+    POST /api/v1/collections/{collection_name}/index
+
+*** Index Creation Request Body
+    #+BEGIN_SRC json
+    {
+      "index_type": "hnsw",
+      "metric_type": "cosine",
+      "params": {
+        "m": 16,
+        "ef_construction": 200
+      }
+    }
+    #+END_SRC
+
+*** Notes
+    - Two-step process: insert, then create index
+    - Initial inserts may be faster
+    - Allows for bulk insertion before indexing
+    - Index creation may take significant time for large datasets
+
+* Scenario 3: Subsequent Inserts After Explicit Index Creation
+
+** Behavior
+   -  It will automatically index new vectors inserted after explicit index creation
+   - The system maintains the existing index structure and updates it with new vectors
+
+** API URL for Subsequent Inserts
+   POST /api/v1/collections/{collection_name}/vectors
+
+** Request Body
+   #+BEGIN_SRC json
+   {
+     "vectors": [
+       {
+         "id": "vec_new",
+         "values": [0.4, 0.5, 0.6, ...],
+         "metadata": {
+           "key1": "value3",
+           "key2": "value4"
+         }
+       },
+       // More vectors...
+     ]
+   }
+   #+END_SRC
+
+** Notes
+   - The URL is the same as in Scenario 1 (index created upfront)
+   - New vectors are automatically added to the existing index
