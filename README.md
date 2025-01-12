@@ -1,5 +1,6 @@
 ![image](https://github.com/user-attachments/assets/89d71986-ce00-4103-a76d-deda76a442e3)
 
+<p align="center">
 CA: Coming soon.
 
 Twitter: https://x.com/SeekrAI_
@@ -7,6 +8,7 @@ Twitter: https://x.com/SeekrAI_
 Website: https://seekerai.net
 
 Telegram: https://t.me/seekrAIsol
+</p>
 
 <p align="center">
     <b>The future ready AI data platform to power the next generation search pipelines.</b>    
