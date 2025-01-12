@@ -10,7 +10,7 @@ Twitter: https://x.com/SeekrAI_
 Website: https://seekrai.net
     </p>
 <p align="center">
-Telegram: https://t.me/seekrAIsol
+Telegram: [https://t.me/seekrAIsol](https://t.me/seekrAI_sol)
 </p>
 
 
