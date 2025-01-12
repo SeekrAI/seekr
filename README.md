@@ -15,7 +15,6 @@ Telegram: https://t.me/seekrAIsol
   <a href="https://github.com/seekrai/seekr/actions"><img src="https://flat.badgen.net/badge/build/passing/green"></a>
   <a href="https://github.com/seekrai/seekr/blob/master/LICENSE"><img src="https://flat.badgen.net/static/license/Apache-2.0"></a>
   <a href="https://www.rust-lang.org/"><img src="https://flat.badgen.net/badge/language/%F0%9F%A6%80%20Rust/yellow"></a>
-  <a href="https://discord.gg/WbSbXYWvta"><img src="https://flat.badgen.net/discord/members/WbSbXYWvta?icon=discord"></a>
 </p>
 </br>
 <p></p>
