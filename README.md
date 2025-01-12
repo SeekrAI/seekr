@@ -7,7 +7,7 @@ CA: Coming soon.
 Twitter: https://x.com/SeekrAI_
     </p>
 <p align="center">
-Website: https://seekerai.net
+Website: https://seekrai.net
     </p>
 <p align="center">
 Telegram: https://t.me/seekrAIsol
